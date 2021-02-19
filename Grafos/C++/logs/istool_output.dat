@@ -1,0 +1,20 @@
+node (id = 0, name = B, desc =  , status = 1, initial value = 50)
+node (id = 1, name = N, desc =  , status = 1, initial value = 12000)
+node (id = 5, name = TO, desc =  , status = 1, initial value = 0)
+interaction (id = 2, name = Int2, type = Phag, status = 1, equation info: 
+Vars:
+ 0
+ 1
+Parameters:
+param (name = k_b_n, value = k_b_n)
+param (name = teta, value = teta)
+Equation text = k_b_n*b*n
+
+, linked nodes: 
+Edge id: 3, Link direction: fromNode, Node id: 0
+Edge id: 4, Link direction: toNode, Node id: 1
+Edge id: 6, Link direction: fromNode, Node id: 5
+)
+edge (id = 3, status = 1, origin_id = 0, destiny_id = 2, expr = )
+edge (id = 4, status = 1, origin_id = 2, destiny_id = 1, expr = )
+edge (id = 6, status = 1, origin_id = 5, destiny_id = 2, expr = )

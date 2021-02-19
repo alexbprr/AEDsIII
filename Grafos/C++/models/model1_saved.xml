@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<model>
+	<nodes>
+		<node id="0">
+			<name>
+				<![CDATA[B]]>
+			</name>
+			<graphic/>
+		</node>
+		<node id="1">
+			<name>
+				<![CDATA[N]]>
+			</name>
+			<graphic/>
+		</node>
+		<node id="5">
+			<name>
+				<![CDATA[TO]]>
+			</name>
+			<graphic/>
+		</node>
+	</nodes>
+</model>
+

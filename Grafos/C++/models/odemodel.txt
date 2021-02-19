@@ -1,0 +1,11 @@
+vars B, N, TO
+params k_b_n, teta
+
+ini
+B = 50
+N = 12000
+TO = 0
+k_b_n = 0.1
+teta = 0.2
+
+eqs

@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<AC>
+	<nodes>
+		<node id="0" name="Node 0" x="142.0" y="93.0" color="#ad7fa8"/>
+		<node id="1" name="Node 1" x="514.0" y="134.0" color="#fce94f"/>
+	</nodes>
+	<edges>
+		<edge name="Fag" src="0" dst="1" probability="80" offset="30">
+			<conditions>
+				<condition state="1" op="&gt;=" amnt="2"/>
+			</conditions>
+		</edge>
+		<edge name="Replication" src="1" dst="0" probability="100" offset="56.04236455380297">
+			<conditions/>
+		</edge>
+	</edges>
+</AC>
