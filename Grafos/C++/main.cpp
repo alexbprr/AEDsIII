@@ -1,8 +1,9 @@
-#include "graph.h"
 #include <iostream>
 #include <fstream>
 #include <string.h> 
 
+#include "graph.h"
+#include "codegeneration.h"
 using namespace std; 
 
 int main(int argv, char *args[]){
@@ -31,7 +32,8 @@ int main(int argv, char *args[]){
     delete g;*/
 
     Graph *g2 = new Graph();
-    g2->readModelXml("models/model1.xml");  
+    //g2->readModelXml("models/model1.xml");  
+    g2->readModelXml("models/model2.xml");  
     /*g2->removeNode(0);
     g2->removeNode(-1);
     g2->removeNode(8);
@@ -43,9 +45,14 @@ int main(int argv, char *args[]){
     g2->printInteractions();
     g2->printEdges();    
 
-    g2->saveGraphToXml("models/model1_saved.xml"); 
+    g2->saveGraphToXml("models/model_saved.xml"); 
+ 
+    //g2->generateODEPythonCode(); 
 
-    g2->generateODEIR(); 
+    CodeGeneration *codeGenerator = new CodeGeneration(g2);
+    //codeGenerator->generateODEIR();    
+    codeGenerator->generateODEPythonCode(); 
+    codeGenerator->generateGillespieCode(); 
      
     delete g2; 
 

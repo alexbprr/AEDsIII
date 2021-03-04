@@ -1,4 +1,11 @@
 #include "graph.h"
+#include "equation.h"
+#include "interaction.h"
+#include "itemgraphic.h"
+#include <cstdio>
+#include <functional>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -21,15 +28,16 @@ Graph::Graph(){
     this->xmlnodes = nullptr;
     this->xmlinteractions = nullptr;
     this->xmledges = nullptr;    
-    
+        
+    Graph::logfile.open("logs/istool_log.dat"); 
+    Graph::outfile.open("logs/istool_output.dat");    
+
     auto start = std::chrono::system_clock::now();    
     std::time_t start_time = std::chrono::system_clock::to_time_t(start);
     std::cout << "started computation at " << std::ctime(&start_time);
     string s("system_log_");
     s += std::ctime(&start_time); 
     s += ".dat"; 
-    Graph::logfile.open("logs/istool_log.dat"); 
-    Graph::outfile.open("logs/istool_output.dat");
 }
 
 Graph::~Graph(){
@@ -38,12 +46,13 @@ Graph::~Graph(){
     for (Interaction* i: interactions)
         delete i;
     for (Edge* e: edges)
-        delete e;
+        delete e;    
     Graph::logfile.close();
     Graph::outfile.close(); 
+
     auto end = std::chrono::system_clock::now();    
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-    std::cout << "finished computation at " << std::ctime(&end_time);
+    std::cout << "finished computation at " << std::ctime(&end_time);    
 }
 
 Node* Graph::getNode(int id){
@@ -69,6 +78,10 @@ Edge* Graph::getEdge(int id){
                 return e;
     return nullptr;
 }
+
+vector<Node*> Graph::getNodes(){ return nodes; }
+vector<Interaction*> Graph::getInteractions(){ return interactions; }
+vector<Edge*> Graph::getEdges(){ return edges; }
 
 bool Graph::searchEdge(int origin, int destiny){
     for (Edge *e: edges) {
@@ -98,6 +111,18 @@ Node* Graph::createNodeWithValues(string name, string desc, int status, double i
         this->nodes.resize(2*this->nodes.capacity());        
     }
     Node* newnode = new Node(Graph::counter++,name,desc,status,inivalue);
+    this->nodes.push_back(newnode);    
+    this->nodes_size = this->nodes.size(); 
+    return newnode;
+}
+
+Node* Graph::createNodeWithValues(int id, string name, string desc, int status, double inivalue, ItemGraphic *g){
+    Graph::logfile << "Graph.createNode: Creating a node object with id " << Graph::counter << endl; 
+    if (this->nodes.size() == this->nodes.capacity()){
+        Graph::logfile << "Node vector is full. Resizing to 2 times the current capacity." << endl;
+        this->nodes.resize(2*this->nodes.capacity());        
+    }
+    Node* newnode = new Node(Graph::counter++,name,desc,status,inivalue,g);
     this->nodes.push_back(newnode);    
     this->nodes_size = this->nodes.size(); 
     return newnode;
@@ -154,13 +179,13 @@ Interaction* Graph::createInteractionWithValues(string name, string type, int st
 }
 
 Interaction* Graph::createInteractionWithValues(int id, string name, string type, int status, int mn, 
-        vector<int> srcn, int sn, vector<int> posI, vector<int> negI, int rule, Equation *eq, float p){
+        vector<int> srcn, int sn, vector<int> posI, vector<int> negI, int rule, Equation *eq, float p, ItemGraphic *ig){
     Graph::logfile << "Creating an interaction object" << endl;
     if (this->interactions.size() == this->interactions.capacity()){
         Graph::logfile << "Interaction vector is full. Resizing to 2 times the current capacity." << endl;
         this->interactions.resize(2*this->interactions.capacity());        
     }
-    Interaction* interaction = new Interaction(id,name,type,status,mn,srcn,sn,posI,negI,rule,eq,p);
+    Interaction* interaction = new Interaction(id,name,type,status,mn,srcn,sn,posI,negI,rule,eq,p,ig);
     this->interactions.push_back(interaction);
     this->interactions_size = this->interactions.size(); 
     return interaction;
@@ -261,9 +286,7 @@ void Graph::removeNode(int id){
     if (pos != -1) {       
         Node *node = nodes.at(pos);
         nodes.erase(nodes.begin()+pos); 
-        int esize = edges.size(); 
-        //edges.erase(std::remove_if(edges.begin(), edges.end(), hasNodeLinked
-        //    ,edges.end());
+        int esize = edges.size();         
         for (int j = 0; j < esize; j++){
             if (edges.size() == 0) break; 
             Edge *e = edges.at(j);
@@ -410,13 +433,16 @@ void Graph::readModelXml(string fname){
             //Error 
             return; 
         }
-        /*for (xml_attribute<> *attr = child->first_attribute();
+        xmlnodes[count].graphic = new graphicinfo;         
+        for (xml_attribute<> *attr = child->first_attribute();
                 attr; attr = attr->next_attribute()){
             if (strcmp(attr->name(),"x") == 0)
-                xmlnodes[count].x = atof(attr->value());
+                xmlnodes[count].graphic->x = atof(attr->value());
             else if (strcmp(attr->name(),"y") == 0)
-                xmlnodes[count].y = atof(attr->value());
-        }*/
+                xmlnodes[count].graphic->y = atof(attr->value());
+            else if (strcmp(attr->name(),"color") == 0)
+                xmlnodes[count].graphic->color = attr->value();
+        }
         child = child->next_sibling();
         if (child == nullptr) {
             Graph::logfile << "status is null" <<endl;
@@ -439,8 +465,9 @@ void Graph::readModelXml(string fname){
         Graph::logfile << xmlnodes[i].name << endl;
         //Graph::logfile << xmlnodes[i].x << endl;
         //Graph::logfile << xmlnodes[i].y << endl;
+        ItemGraphic *ig = new ItemGraphic(xmlnodes[i].graphic->x,xmlnodes[i].graphic->y,xmlnodes[i].graphic->color);
         this->createNodeWithValues(atoi(xmlnodes[i].id.c_str()),xmlnodes[i].name," ", xmlnodes[i].status, 
-                xmlnodes[i].initial_value);
+                xmlnodes[i].initial_value, ig);
     }
 
     //-------------------------------//-----------------------
@@ -489,13 +516,16 @@ void Graph::readModelXml(string fname){
             //Error
         }        
         xmlinteractions[count].name = child->first_node()->value(); //get cdata
-        child = child->next_sibling();        
+        child = child->next_sibling();  
+        xmlinteractions[count].graphic = new graphicinfo;       
         for (xml_attribute<> *attr = child->first_attribute();
                 attr; attr = attr->next_attribute()){
             if (strcmp(attr->name(),"x") == 0)
-                xmlinteractions[count].x = atof(attr->value());
+                xmlinteractions[count].graphic->x = atof(attr->value());
             else if (strcmp(attr->name(),"y") == 0)
-                xmlinteractions[count].y = atof(attr->value());
+                xmlinteractions[count].graphic->y = atof(attr->value());
+            else if (strcmp(attr->name(),"color") == 0)
+                xmlinteractions[count].graphic->color = attr->value(); 
         }        
         child = child->next_sibling();
         xmlinteractions[count].type = child->first_node()->value(); //get cdata
@@ -528,7 +558,9 @@ void Graph::readModelXml(string fname){
             cout << "mainnode id " <<  attr->value() << endl;
             xmlinteractions[count].mainNode = atoi(attr->value());
         }
-        xml_node<> *sources = mainnode->next_sibling(); 
+        else  
+            xmlinteractions[count].mainNode = -1; 
+        xml_node<> *sources = mainnode->next_sibling();         
         xml_node<> *source = sources->first_node(); //get first source child          
         for (;source; source = source->next_sibling()){
             attr = source->first_attribute();
@@ -538,11 +570,14 @@ void Graph::readModelXml(string fname){
         xml_node<> *sink = sources->next_sibling();
         attr = sink->first_attribute();            
         if (attr != nullptr)
-            xmlinteractions[count].sinkNode = atoi(attr->value());        
+            xmlinteractions[count].sinkNode = atoi(attr->value());
+        else 
+            xmlinteractions[count].sinkNode = -1; 
+        cout << "Pos influence" << endl; 
         xml_node<> *posInfluence = sink->next_sibling();
         if (posInfluence != nullptr){ 
             child = posInfluence->first_node();
-            cout << child->name() << endl;
+            //cout << child->name() << endl;
             for (;child; child = child->next_sibling()){
                 attr = child->first_attribute();
                 if (attr != nullptr)
@@ -566,34 +601,42 @@ void Graph::readModelXml(string fname){
             else 
                 xmlinteractions[count].joinRule = 1;
         }
-        xmlinteractions[count].equation = new equationinfo; 
-        xml_node<> *equation = relations->next_sibling();
-        xml_node<> *parameters = equation->first_node();
-        child = parameters->first_node(); 
-        string name; 
-        float value; 
-        for (;child; child = child->next_sibling()){
-            attr = child->first_attribute();
-            if (attr != nullptr)    
-                name = attr->value(); 
-            attr = attr->next_attribute();
-            if (attr != nullptr)   
-                value = atof(attr->value()); 
-            xmlinteractions[count].equation->parameters.push_back(make_pair(name,value));
+
+        xmlinteractions[count].equation = nullptr;     
+        xml_node<> *equation = n->first_node("equation");
+        if (equation != nullptr && equation->first_node() != nullptr) {
+            cout << "Equation is not null" << endl;
+            xmlinteractions[count].equation = new equationinfo; 
+            xml_node<> *parameters = equation->first_node();
+            child = parameters->first_node(); 
+            string name; 
+            float value; 
+            for (;child; child = child->next_sibling()){
+                attr = child->first_attribute();
+                if (attr != nullptr)    
+                    name = attr->value(); 
+                attr = attr->next_attribute();
+                if (attr != nullptr)   
+                    value = atof(attr->value()); 
+                xmlinteractions[count].equation->parameters.push_back(make_pair(name,value));
+            }
+            xml_node<> *vars = parameters->next_sibling();
+            child = vars->first_node();         
+            for (;child; child = child->next_sibling()){
+                attr = child->first_attribute();
+                if (attr != nullptr)    
+                    xmlinteractions[count].equation->node_ids.push_back(atoi(attr->value()));
+            } 
+            xml_node<> *text = vars->next_sibling();            
+            xmlinteractions[count].equation->text = text->first_node()->value();            
+            cout << "Eq text " << xmlinteractions[count].equation->text << endl; 
         }
-        xml_node<> *vars = parameters->next_sibling();
-        child = vars->first_node();         
-        for (;child; child = child->next_sibling()){
-            attr = child->first_attribute();
-            if (attr != nullptr)    
-                xmlinteractions[count].equation->node_ids.push_back(atoi(attr->value()));
-        } 
-        xml_node<> *text = vars->next_sibling();
-        xmlinteractions[count].equation->text = text->first_node()->value();
-        xml_node<> *probability = equation->next_sibling();
+        xml_node<> *probability = relations->next_sibling("probability");
         attr = probability->first_attribute();
         if (attr != nullptr)
             xmlinteractions[count].p = atof(attr->value());
+        else 
+            xmlinteractions[count].p = 1; 
 
         count++;
         if (count == this->interactions_size) {
@@ -607,8 +650,6 @@ void Graph::readModelXml(string fname){
         if (xmlinteractions[i].id.empty()) break;
         Graph::logfile << xmlinteractions[i].id << endl;
         Graph::logfile << xmlinteractions[i].name << endl;
-        Graph::logfile << xmlinteractions[i].x << endl;
-        Graph::logfile << xmlinteractions[i].y << endl;
         Graph::logfile << xmlinteractions[i].type << endl;
         Graph::logfile << "Links: " << endl;
         for(int j = 0; j < xmlinteractions[i].num_of_links; j++){
@@ -632,26 +673,29 @@ void Graph::readModelXml(string fname){
             Graph::logfile << " " << s << ",\n";
         }
         Graph::logfile << "join_rule = " << xmlinteractions[i].joinRule << "\n"; 
-        Graph::logfile << "parameters:\n"; 
-        for(pair<string,float> p: xmlinteractions[i].equation->parameters){
-            Graph::logfile << " (name =  " << p.first << ", value = " << p.second << ")\n";
+        Equation *neweq = new Equation(); 
+        if (xmlinteractions[i].equation != nullptr){
+            Graph::logfile << "parameters:\n"; 
+            for(pair<string,float> p: xmlinteractions[i].equation->parameters){
+                Graph::logfile << " (name =  " << p.first << ", value = " << p.second << ")\n";
+            }
+            Graph::logfile << "vars:\n"; 
+            for(int id: xmlinteractions[i].equation->node_ids){
+                Graph::logfile << " " << id << "\n";
+            }
+            Graph::logfile << "text = " << xmlinteractions[i].equation->text << "\n"; 
+            
+            neweq = new Equation(xmlinteractions[i].equation->parameters, 
+                xmlinteractions[i].equation->node_ids, xmlinteractions[i].equation->text);  
         }
-        Graph::logfile << "vars:\n"; 
-        for(int id: xmlinteractions[i].equation->node_ids){
-            Graph::logfile << " " << id << "\n";
-        }
-        Graph::logfile << "text = " << xmlinteractions[i].equation->text << "\n"; 
-        Graph::logfile << "probability = " << xmlinteractions[i].p << "\n";
+        Graph::logfile << "probability = " << xmlinteractions[i].p << "\n";        
 
-        //Create equation object xmlinteractions[i].equation
-        Equation *neweq = new Equation(xmlinteractions[i].equation->parameters, 
-            xmlinteractions[i].equation->node_ids, xmlinteractions[i].equation->text);  
+        ItemGraphic *ig = new ItemGraphic(xmlinteractions[i].graphic->x,xmlinteractions[i].graphic->y,xmlinteractions[i].graphic->color);
 
         Interaction* newInteraction = this->createInteractionWithValues(atoi(xmlinteractions[i].id.c_str()),
             xmlinteractions[i].name, xmlinteractions[i].type, xmlinteractions[i].status, xmlinteractions[i].mainNode,
             xmlinteractions[i].sourceNodes, xmlinteractions[i].sinkNode, xmlinteractions[i].positiveInfluences,
-            xmlinteractions[i].negativeInfluences, xmlinteractions[i].joinRule, neweq, 
-            xmlinteractions[i].p);  
+            xmlinteractions[i].negativeInfluences, xmlinteractions[i].joinRule, neweq, xmlinteractions[i].p, ig);  
         //Inserir os nodes dos links em newInteraction
         for(int j = 0; j < xmlinteractions[i].num_of_links; j++){
             Node *ntemp = getNode(xmlinteractions[i].links[j].node_id);
@@ -693,17 +737,43 @@ void Graph::saveGraphToXml(string fname){
 
     xml_node<>* root = doc.allocate_node(node_element, "model");
     doc.append_node(root);
-
-    /*<name>
-          <![CDATA[B]]>                    
-        </name>
-        <graphic x="324.00" y="100.00" color="255,255,255"/>
-        <status>
-            <![CDATA[1]]>
-        </status>
-        <initialvalue>
-            <![CDATA[50]]>
-        </initialvalue>*/
+/*
+        <links>
+          <link edge_id="3" node_id="0" direction="fromNode"/>
+          <link edge_id="4" node_id="1" direction="toNode"/>
+          <link edge_id="6" node_id="5" direction="fromNode"/>
+        </links>
+        <relations>    
+          <mainnode id="0"/>       
+          <sources>
+            <source id="0"/>
+            <source id="1"/>
+          </sources>
+          <sink id="1"/>
+          <positive_influences> 
+            <node id="0"/>
+            <node id="1"/>
+          </positive_influences>
+          <negative_influences> 
+            <node id="0"/>
+          </negative_influences>
+          <join_rule value="and"/>
+        </relations>
+        <equation>
+            <parameters>
+                <parameter name="k_b_n" value="0.1"/>                
+            </parameters>
+            <vars>
+                <var id="0"/>
+                <var id="1"/>
+            </vars>
+            <text>
+                <![CDATA[k_b_n*B*N]]>
+            </text>
+        </equation>
+        <probability value="0.8"/> 
+      </interaction>
+*/
 
     xml_node<>* child_nodes = doc.allocate_node(node_element, "nodes");
     root->append_node(child_nodes);
@@ -717,130 +787,63 @@ void Graph::saveGraphToXml(string fname){
                 "", doc.allocate_string(n->getName().c_str())));
             node->append_node(nodetemp);
             nodetemp = doc.allocate_node(node_element, "graphic");
-            //nodetemp->append_attribute(doc.append_attribute())
-
+            if (n->getItemGraphic() != nullptr) {
+                nodetemp->append_attribute(doc.allocate_attribute("x",doc.allocate_string(to_string(n->getItemGraphic()->getX()).c_str())));
+                nodetemp->append_attribute(doc.allocate_attribute("y",doc.allocate_string(to_string(n->getItemGraphic()->getY()).c_str())));
+                nodetemp->append_attribute(doc.allocate_attribute("color",doc.allocate_string(n->getItemGraphic()->getColor().c_str())));
+            }            
             node->append_node(nodetemp);
+            nodetemp = doc.allocate_node(node_element, "status");
+            nodetemp->append_node(doc.allocate_node(node_cdata,
+                "", doc.allocate_string(to_string(n->getStatus()).c_str())));
+            node->append_node(nodetemp);
+            nodetemp = doc.allocate_node(node_element, "initial_value");
+            nodetemp->append_node(doc.allocate_node(node_cdata,
+                "", doc.allocate_string(to_string(n->getInitialValue()).c_str())));
+            node->append_node(nodetemp);            
             child_nodes->append_node(node);
+        }
+    }
+
+    child_nodes = doc.allocate_node(node_element, "interactions");
+    root->append_node(child_nodes);
+    for (Interaction *in: interactions){
+        if (in != nullptr){
+            xml_node<>* internode = doc.allocate_node(node_element, "interaction");
+            xml_node<>* nodetemp = doc.allocate_node(node_element, "name");
+            nodetemp->append_node(doc.allocate_node(node_cdata,
+                "", doc.allocate_string(in->getName().c_str())));
+            internode->append_node(nodetemp);
+
+            nodetemp = doc.allocate_node(node_element, "graphic");
+            if (in->getItemGraphic() != nullptr) {
+                nodetemp->append_attribute(doc.allocate_attribute("x",doc.allocate_string(to_string(in->getItemGraphic()->getX()).c_str())));
+                nodetemp->append_attribute(doc.allocate_attribute("y",doc.allocate_string(to_string(in->getItemGraphic()->getY()).c_str())));
+                nodetemp->append_attribute(doc.allocate_attribute("color",doc.allocate_string(in->getItemGraphic()->getColor().c_str())));
+            }  
+            internode->append_node(nodetemp);
+            //type, status, links, relations  
+            nodetemp = doc.allocate_node(node_element, "type");
+            nodetemp->append_node(doc.allocate_node(node_cdata,
+                "", doc.allocate_string(in->getType().c_str())));
+            internode->append_node(nodetemp);
+            nodetemp = doc.allocate_node(node_element, "status");
+            nodetemp->append_node(doc.allocate_node(node_cdata,
+                "", doc.allocate_string(to_string(in->getStatus()).c_str())));
+            internode->append_node(nodetemp);
+
+            nodetemp = doc.allocate_node(node_element, "links");
+
+            child_nodes->append_node(internode);
         }
     }
 
     // Convert doc to string if needed
     //std::string xml_as_string;
     //rapidxml::print(std::back_inserter(xml_as_string), doc);
-
     // Save to file
     std::ofstream file_stored(fname);
     file_stored << doc;
     file_stored.close();
     doc.clear();
-}
-
-void Graph::generateODEIR(){
-    /* 
-        vars ... 
-        params ... 
-        ini ... 
-        eqs ... 
-    */
-    ofstream fp;
-    fp.open("models/odemodel.txt", ios::out);
-    vector<pair<string,float>> vars;
-    vector<pair<string,float>> parameters; 
-    
-    for (Node *n: nodes){
-        if (n != nullptr)
-            vars.push_back(make_pair(n->getName(),n->getInitialValue()));
-    }
-    for (Interaction *in: interactions){
-        if (in != nullptr){
-            Equation *eq = in->getEquation(); 
-            if (eq != nullptr){
-                vector<pair<string,float>> newparams = eq->getParameters();                 
-                for (pair<string,float> p: newparams)
-                    if (!get<0>(p).empty())
-                        parameters.push_back(p);
-            }
-        }
-    }
-
-    if (fp.is_open()){
-        fp << "vars "; 
-        for (pair<string,float> p: vars){
-            if (p == vars.back())
-                fp << get<0>(p);
-            else
-                fp << get<0>(p) << ", ";
-        }
-        fp << endl; 
-        fp << "params ";
-        for (pair<string,float> p: parameters){   
-            if (p == parameters.back())
-                fp << get<0>(p);
-            else  
-                fp << get<0>(p) << ", ";
-        }
-        fp << endl;
-    }
-
-    //Gerar a inicializacao com base nos vectors 
-    fp << "\nini\n"; 
-    for (pair<string,float> p: vars){
-        fp << get<0>(p) << " = " << get<1>(p) << endl; 
-    }
-    for (pair<string,float> p: parameters){
-        fp << get<0>(p) << " = " << get<1>(p) << endl; 
-    }
-    
-    //Nome da equação = nome da interação em que ela está definida 
-    /*Percorre todas as interações ligadas a um nó realizando as seguintes ações:
-        - Se o nó é mainNode, verificar a direção da ligação. 
-            . fromNode: definir o sinal da equação como negativo; 
-            . toNode: definir o sinal da equação como positivo; 
-            . Depois verificar se o texto da equação está vazio. 
-                . Caso vazio, verificar influência positiva. 
-                    . Se estiver em posI, gerar string 
-    */
-    
-    //Obs: todos os termos de um nó serão inseridos no pair nodeEquations. 
-    //Cada termo ocupará uma posição do vector. 
-    /* Para cada interação, realizar as seguintes ações: 
-        -  Verificar se mainNode está definido: 
-            . Verificar direção da ligação com mainNode: 
-                . fromNode: definir o sinal da equação como negativo; 
-                . toNode: definir o sinal da equação como positivo; 
-            . Verificar se o texto da equação está vazio. 
-                . Se vazio, verificar influência positiva. 
-                    . Se joinRule == AND:
-                        . Concetenar um parametro e 
-                        . Para cada nó em posI: 
-                            . Concatenar o nome do nó com multiplicação no numerador. 
-                . Se vazio, verificar influência negativa. 
-                    . Se joinRule == AND:
-                        . Concatenar um parametro e 
-                        . Para cada nó em negI: 
-                            . Concatenar o nome do nó com multiplicação no denominador. 
-                . Acrescentar concat(sinal,numerador,/,denominador) em nodeEquations[mainNode]. 
-                . Se não vazio, acrescentar concat(sinal,textoeq) em nodeEquations[mainNode]. 
-
-        - Verificar se sink está definido: 
-            . Verificar se o texto da equação está vazio. 
-                . Se vazio, verificar influência positiva. 
-                    . Se joinRule == AND:
-                        . Concetenar um parametro e 
-                        . Para cada nó em posI: 
-                            . Concatenar o nome do nó com multiplicação no numerador. 
-                . Se vazio, verificar influência negativa. 
-                    . Se joinRule == AND:
-                        . Concatenar um parametro e 
-                        . Para cada nó em negI: 
-                            . Concatenar o nome do nó com multiplicação no denominador. 
-                . Para cada source: Acrescentar concat(-,numerador,/,denominador) em nodeEquations[source]. 
-                . Acrescentar concat(+,numerador,/,denominador) em nodeEquations[sink]. 
-    */
-    /*
-        - Percorrer o pair nodeEquations gerando as equações para cada nó
-    */
-    fp << "\neqs\n";     
-
-    fp.close(); 
 }

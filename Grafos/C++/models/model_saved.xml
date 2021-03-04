@@ -1,108 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <model>
 	<nodes>
-		<node id="12">
-			<name>
-				<![CDATA[d]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="16">
-			<name>
-				<![CDATA[No_16]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="20">
-			<name>
-				<![CDATA[h]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="24">
-			<name>
-				<![CDATA[c]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="28">
-			<name>
-				<![CDATA[e]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="32">
+		<node id="0">
 			<name>
 				<![CDATA[B]]>
 			</name>
-			<graphic/>
+			<graphic x="324.000000" y="100.000000" color="255,255,255"/>
+			<status>
+				<![CDATA[1]]>
+			</status>
+			<initial_value>
+				<![CDATA[50.000000]]>
+			</initial_value>
 		</node>
-		<node id="36">
+		<node id="1">
 			<name>
-				<![CDATA[f]]>
+				<![CDATA[N]]>
 			</name>
-			<graphic/>
+			<graphic x="450.000000" y="120.000000" color="255,255,255"/>
+			<status>
+				<![CDATA[1]]>
+			</status>
+			<initial_value>
+				<![CDATA[120.000000]]>
+			</initial_value>
 		</node>
-		<node id="40">
+		<node id="2">
 			<name>
-				<![CDATA[c]]>
+				<![CDATA[TO]]>
 			</name>
-			<graphic/>
-		</node>
-		<node id="44">
-			<name>
-				<![CDATA[d]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="48">
-			<name>
-				<![CDATA[c]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="52">
-			<name>
-				<![CDATA[d]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="56">
-			<name>
-				<![CDATA[d]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="60">
-			<name>
-				<![CDATA[g]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="64">
-			<name>
-				<![CDATA[e]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="68">
-			<name>
-				<![CDATA[c]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="72">
-			<name>
-				<![CDATA[e]]>
-			</name>
-			<graphic/>
-		</node>
-		<node id="76">
-			<name>
-				<![CDATA[A]]>
-			</name>
-			<graphic/>
+			<graphic x="45.000000" y="12.000000" color="255,255,255"/>
+			<status>
+				<![CDATA[1]]>
+			</status>
+			<initial_value>
+				<![CDATA[0.000000]]>
+			</initial_value>
 		</node>
 	</nodes>
+	<interactions>
+		<interaction>
+			<name>
+				<![CDATA[Int2]]>
+			</name>
+			<graphic x="89.000000" y="5.000000" color="255,255,255"/>
+			<type>
+				<![CDATA[Phag]]>
+			</type>
+			<status>
+				<![CDATA[1]]>
+			</status>
+		</interaction>
+		<interaction>
+			<name>
+				<![CDATA[Rep]]>
+			</name>
+			<graphic x="89.000000" y="5.000000" color="255,255,255"/>
+			<type>
+				<![CDATA[Rep]]>
+			</type>
+			<status>
+				<![CDATA[1]]>
+			</status>
+		</interaction>
+		<interaction>
+			<name>
+				<![CDATA[Migration]]>
+			</name>
+			<graphic x="89.000000" y="5.000000" color="255,255,255"/>
+			<type>
+				<![CDATA[]]>
+			</type>
+			<status>
+				<![CDATA[1]]>
+			</status>
+		</interaction>
+		<interaction>
+			<name>
+				<![CDATA[N_Death]]>
+			</name>
+			<graphic x="89.000000" y="5.000000" color="255,255,255"/>
+			<type>
+				<![CDATA[]]>
+			</type>
+			<status>
+				<![CDATA[1]]>
+			</status>
+		</interaction>
+	</interactions>
 </model>
 

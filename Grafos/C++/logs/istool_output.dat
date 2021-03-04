@@ -1,20 +1,17 @@
-node (id = 0, name = B, desc =  , status = 1, initial value = 50)
-node (id = 1, name = N, desc =  , status = 1, initial value = 12000)
-node (id = 5, name = TO, desc =  , status = 1, initial value = 0)
-interaction (id = 2, name = Int2, type = Phag, status = 1, equation info: 
-Vars:
- 0
- 1
-Parameters:
-param (name = k_b_n, value = k_b_n)
-param (name = teta, value = teta)
-Equation text = k_b_n*b*n
-
-, linked nodes: 
-Edge id: 3, Link direction: fromNode, Node id: 0
-Edge id: 4, Link direction: toNode, Node id: 1
-Edge id: 6, Link direction: fromNode, Node id: 5
-)
+node (id = 0, name = B, desc =  , status = 1, initial value = 50, pos = (324,100), color = 255,255,255)
+node (id = 1, name = N, desc =  , status = 1, initial value = 120, pos = (450,120), color = 255,255,255)
+node (id = 2, name = TO, desc =  , status = 1, initial value = 0, pos = (45,12), color = 255,255,255)
+interaction (id = 2, name = Int2, type = Phag, status = 1, equation info: {Vars: [ 0, 1,],Parameters:[(name = k_b_n, value = 0.1)],Equation text:}
+, linked nodes:{ Edge id: 3, Link direction: fromNode, Node id: 0Edge id: 4, Link direction: toNode, Node id: 1}, pos = (89,5), color = 255,255,255)
+interaction (id = 7, name = Rep, type = Rep, status = 1, equation info: {Vars: [],Parameters:[],Equation text:}
+, linked nodes:{ Edge id: 8, Link direction: toNode, Node id: 0}, pos = (89,5), color = 255,255,255)
+interaction (id = 9, name = Migration, type = , status = 1, equation info: {Vars: [],Parameters:[],Equation text:}
+, linked nodes:{ Edge id: 10, Link direction: toNode, Node id: 1}, pos = (89,5), color = 255,255,255)
+interaction (id = 11, name = N_Death, type = , status = 1, equation info: {Vars: [],Parameters:[],Equation text:}
+, linked nodes:{ Edge id: 12, Link direction: fromNode, Node id: 1}, pos = (89,5), color = 255,255,255)
 edge (id = 3, status = 1, origin_id = 0, destiny_id = 2, expr = )
 edge (id = 4, status = 1, origin_id = 2, destiny_id = 1, expr = )
 edge (id = 6, status = 1, origin_id = 5, destiny_id = 2, expr = )
+edge (id = 8, status = 1, origin_id = 7, destiny_id = 0, expr = )
+edge (id = 10, status = 1, origin_id = 9, destiny_id = 1, expr = )
+edge (id = 10, status = 1, origin_id = 1, destiny_id = 11, expr = )

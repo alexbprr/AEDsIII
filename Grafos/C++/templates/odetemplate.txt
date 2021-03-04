@@ -1,0 +1,33 @@
+$imports 
+
+def odesystem(P, t, $params): 
+    $vars = $P
+$equations 
+    return $results 
+
+$initialization 
+t=range($T)
+P = [$vars]
+ 
+model_args = ($params)
+    
+results = odeint(odesystem, P, t, args=(model_args)) 
+
+#save results 
+print(str(results))
+
+def saveTime(filename, t):
+    fd = open(filename, "w")
+    for i in t:
+        fd.write(str(i) + "\n")        
+    fd.close()
+
+def saveData(filename, t, M, index):
+    fd = open(filename, "w")
+    cont = 0
+    for i in t:
+        fd.write(str(M[cont][index]) + "\n")
+        cont = cont + 1
+    fd.close()
+
+$save 

@@ -7,7 +7,7 @@
 #include <vector> 
 #include <list> 
 #include <tuple> 
-#include "guigraphic.h"
+#include "itemgraphic.h"
 
 using namespace std;
 
@@ -27,21 +27,25 @@ using namespace std;
 //Class Node represents a biological entity of the system 
 class Node{
 public:    
-    enum class LinkDirection { toNode = 0, fromNode = 1};
+    enum class LinkDirection { toNode = 0, fromNode = 1, none = 2};
     enum class Status {inactive = 0, active = 1};
     Node(int id); //Toda vez que um nó é criado ele recebe um id único
     Node(int id, string name, string desc, int status, double iniv);
+    Node(int id, string name, string desc, int status, double iniv, ItemGraphic *g);
     ~Node();
+    bool hasInteraction(); 
     void addInteraction(Node::LinkDirection d, int id);
+    void removeInteraction(int id);
     int getId();
     string getName();
-    float getInitialValue();
-    void removeInteraction(int id);
+    int getStatus();
+    float getInitialValue(); 
+    ItemGraphic *getItemGraphic();    
     void setName(string n); 
     void setDesc(string d);
     void setStatus(int s);
     void setInitialValue(float v);
-    void setGraphic(GuiGraphic* g); 
+    void setItemGraphic(ItemGraphic* g); 
     friend ostream& operator<<(ostream& os, const Node& n);
     void generateCAIR(); //gera o xml para o nó baseado no tipo de interação 
     //void generateCACode(); //gera o código em Python considerando o estado igual a id 
@@ -51,7 +55,7 @@ private:
     string desc;
     int status;    
     float initialvalue;
-    GuiGraphic* graphic; 
+    ItemGraphic* graphic; 
     vector<pair<Node::LinkDirection,int>> interactions; 
 };
 

@@ -15,13 +15,18 @@ public:
     ~Equation();     
     vector<pair<string,float>> getParameters();
     string getText();
+    void setParameters(vector<pair<string,float>> p); 
+    void setVars(vector<int> ids);
+    void setText(string t); 
+    void addParameter(pair<string,float> p);
+    void addVar(int id); 
     friend ostream& operator<<(ostream& os, const Equation& i);
 
 private: 
     //Os valores iniciais dos parâmetros serão armazenados em outro arquivo?
     //string name; 
     vector<pair<string,float>> parameters; 
-    vector<int> node_ids; //variables of the equation 
+    vector<int> nodeIds; //variables of the equation 
     string text; 
 }; 
 

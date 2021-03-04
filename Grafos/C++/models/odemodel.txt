@@ -1,11 +1,17 @@
-vars B, N, TO
-params k_b_n, teta
+vars B, N
+params k_b_n, p0, p1, p2, p3, p4, p5
 
 ini
 B = 50
-N = 12000
-TO = 0
+N = 120
 k_b_n = 0.1
-teta = 0.2
+p0 = 0.01
+p1 = 0.01
+p2 = 0.01
+p3 = 0.01
+p4 = 0.01
+p5 = 0.01
 
 eqs
+dB_dt = -(p0*B*N)/(1 + p1*B) +(p2*B) 
+dN_dt = +(p3*B*N)/(1 + p4*B) -(p5*N) 
