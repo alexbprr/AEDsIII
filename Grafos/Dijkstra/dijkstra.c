@@ -128,5 +128,5 @@ int main(){
     dijkstra(g,0);
     //dijkstra(g,1);
     //dijkstra(g,3);
-    free(g);
+    liberaGrafo(g);
 }
