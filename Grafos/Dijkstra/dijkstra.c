@@ -107,26 +107,39 @@ void dijkstra(Grafo* g, int source){
 }
 
 int main(){
-    Grafo *g = criaGrafo(0, 5);
-    inicializaMatrizAdj(g);
-    
-    g->matrizadj[0][1] = 10;
-    g->matrizadj[1][0] = 10;
-    g->matrizadj[0][2] = 5;
-    g->matrizadj[2][0] = 5;
-    g->matrizadj[1][2] = 6;
-    g->matrizadj[2][1] = 6;
-    g->matrizadj[1][3] = 1;
-    g->matrizadj[3][1] = 1;
-    g->matrizadj[2][3] = 2;
-    g->matrizadj[3][2] = 2;
-    g->matrizadj[2][4] = 1;
-    g->matrizadj[4][2] = 1;
-    g->matrizadj[4][3] = 2;
-    g->matrizadj[3][4] = 2;
+    Grafo *g = criaGrafo(0, 6); //0: não direcionado 
+    inicializaMatrizAdj(g);//Inicializa a matriz com zeros 
 
+    //Grafo do 1º exemplo     
+    criaAresta(g, 0, 1, 4);
+    criaAresta(g, 0, 3, 8);
+    criaAresta(g, 1, 2, 8);
+    criaAresta(g, 1, 3, 3);
+    criaAresta(g, 2, 5, 2);
+    criaAresta(g, 3, 5, 7);
+    criaAresta(g, 3, 4, 1);
+    criaAresta(g, 4, 5, 5);
+    
     dijkstra(g,0);
     //dijkstra(g,1);
     //dijkstra(g,3);
+    liberaGrafo(g);
+
+    //Grafo do 2º exemplo 
+    g = criaGrafo(1, 6);
+    inicializaMatrizAdj(g);
+    //0: A; 1: B; 2: C; 3: D; 4: E; 5: F
+    criaAresta(g, 0, 1, 7);
+    criaAresta(g, 0, 2, 3);
+    criaAresta(g, 1, 2, 5);
+    criaAresta(g, 1, 3, 9);
+    criaAresta(g, 2, 4, 8);
+    criaAresta(g, 3, 4, 2);
+    criaAresta(g, 3, 5, 3);
+    criaAresta(g, 4, 1, 6);
+    criaAresta(g, 4, 5, 4);
+
+    dijkstra(g, 0);
+
     liberaGrafo(g);
 }
