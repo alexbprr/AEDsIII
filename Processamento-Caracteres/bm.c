@@ -56,7 +56,7 @@ int main(){
     int lastOcc[255];
     for (i=0; i < 255; i++)
         lastOcc[i] = -1;
-    for (i=0; i < M; i++) 
+    for (i=0; i < M-1; i++) 
         lastOcc[padrao[i]] = i;
 
     FILE* lastOccfile = fopen("ultimas_ocorrencias.txt", "w");
