@@ -21,7 +21,7 @@ void bmh(char *texto, char *padrao, int *posicoes, int M, int N, int lastOcc[]){
             posicoes[cont] = 1;
             cont++;
         }        
-        i0 = i0 + M-1 - lastOcc[texto[i0+M-1]];        
+        i0 = i0 + (M-1 - lastOcc[texto[i0+M-1]]);        
 	    printf("i0 = %d\n", i0);
     }
     printf("Foram encontradas %d ocorrências do padrão\n", cont);
@@ -42,8 +42,8 @@ int main(){
     printf("Digite qual o padrão procurado:\n");
     scanf("%s", padrao);
 
-    int lastOcc[128];
-    for (i=0; i < 128; i++)
+    int lastOcc[255];
+    for (i=0; i < 255; i++)
         lastOcc[i] = -1;
     for (i=0; i < M-1; i++)
         lastOcc[padrao[i]] = i;

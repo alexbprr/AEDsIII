@@ -24,7 +24,7 @@ void bm(char *texto, char *padrao, int *posicoes, int M, int N, int lastOcc[]){
         else if (j < lastOcc[texto[i0+j]])        
             i0++;        
         else        
-            i0 = i0 + j - lastOcc[texto[i0+j]];        
+            i0 = i0 + (j - lastOcc[texto[i0+j]]);
 	    printf("i0 = %d\n", i0);
     }
     printf("Foram encontradas %d ocorrências do padrão\n", cont);
@@ -50,16 +50,31 @@ int main(){
 
     printf("Digite qual o padrão procurado:\n");
     scanf("%s", padrao);
+    //padrao = "análise"; 
 
     //lastOcc: Guarda o índice da última ocorrência de uma letra no padrão (utiliza o código ASCII da letra como indice)
-    int lastOcc[128];
-    for (i=0; i < 128; i++)
+    int lastOcc[255];
+    for (i=0; i < 255; i++)
         lastOcc[i] = -1;
     for (i=0; i < M; i++) 
         lastOcc[padrao[i]] = i;
 
+    FILE* lastOccfile = fopen("ultimas_ocorrencias.txt", "w");
+    fprintf(lastOccfile,"Últimas ocorrências:\n");
+    for (i=32; i < 255; i++)
+        fprintf(lastOccfile,"lastOcc[%c] = %d\n", (unsigned char)i, lastOcc[i]);
+    fclose(lastOccfile);
+
     le_sequencia("dna.txt", texto, N);
     tInicio = clock();
+
+    /*FILE *entrada = fopen("entrada.txt", "r");
+    char *linha = (char*) malloc(1000*sizeof(char));
+    size_t bufsize = 1000;
+    while (getline(&linha, &bufsize, entrada)){
+        bm(linha, padrao, posicoes, M, N, lastOcc);
+    }
+    free(linha);*/
     bm(texto, padrao, posicoes, M, N, lastOcc);
     tFim = clock();
     tDecorrido = ((double)(tFim - tInicio) / CLOCKS_PER_SEC );

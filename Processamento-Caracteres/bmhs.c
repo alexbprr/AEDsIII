@@ -42,8 +42,8 @@ int main(){
     printf("Digite qual o padrão procurado:\n");
     scanf("%s", padrao);
 
-    int lastOcc[128];
-    for (i=0; i < 128; i++)
+    int lastOcc[255];
+    for (i=0; i < 255; i++)
         lastOcc[i] = -1;
     for (i=0; i < M; i++) //Começa a procurar do último caractere do padrão
         lastOcc[padrao[i]] = i;
