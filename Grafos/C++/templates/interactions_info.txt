@@ -1,5 +1,0 @@
-rep: mainNode = $destiny, posInfluence = $destiny, equation = r$destiny*$destiny ;
-mig: mainNode = $destiny, posInfluence = $destiny, equation = s$destiny*$destiny ;
-phag: mainNode = $source1, posInfluence = {$source1,$source2}, equation = l*$source1*$source2 ;
-apoptosis: mainNode = $source,  posInfluence = $source, equation = m$destiny*$destiny ; 
-differentiation: sources = $source, sinkNode = $destiny, equation = act$source*$source; 
