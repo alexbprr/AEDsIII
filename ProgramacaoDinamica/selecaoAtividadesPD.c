@@ -20,10 +20,12 @@ void imprimeAtividades(atividades **a, int i, int j){
 }
 
 int selecaoAtividadesPD(atividades **a, int s[], int f[], int i, int j){
+    printf("Resolvendo subproblema S(%d,%d):\n", i,j);
     if (j - i < 2)
         return 0;
     if (a[i][j].c > 0)
         return a[i][j].c;
+    
     for(int k=i+1; k < j; k++){
         a[i][k].c = selecaoAtividadesPD(a,s,f,i,k);
         a[k][j].c = selecaoAtividadesPD(a,s,f,k,j);

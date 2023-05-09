@@ -3,6 +3,7 @@
 #include <string>
 #include <queue>
 #include <iostream> 
+#include "random.h"
 using namespace std;
 
 typedef struct TEdge {
@@ -44,14 +45,15 @@ typedef struct TGraph {
     std::string name;
     enum graphtype {undirected = 0, directed = 1} gtype;
     int nv;
-    std::map<int, Vertex > vertexList; 
-    std::vector< Edge > edgeList;
+    
+    std::vector< bool > visited;
 
-    bool visited[];
+    std::vector< Edge > edgeList;
+    std::map<int, Vertex > vertexList; 
 
     TGraph(){ nv = 0; gtype = undirected; }
     TGraph(std::string n): name(n){ nv = 0; gtype = undirected; }
-    TGraph(std::string n, int v): name(n), nv(v){ gtype = undirected; }
+    TGraph(std::string n, int v): name(n), nv(v){ nv = v; gtype = undirected; visited.reserve(v); visited.resize(v); }
     ~TGraph(){}
     void setType(graphtype t){
         gtype = t;
@@ -67,6 +69,14 @@ typedef struct TGraph {
         Vertex v = {id,name};
         vertexList[id] = v; 
         nv++;
+    }
+    Vertex getVertex(std::string n){
+        Vertex emptyVertex; 
+        emptyVertex.id = -1; 
+        for (pair< int, Vertex> p: vertexList)
+            if (p.second.name == n)
+                return p.second;
+        return emptyVertex;
     }
     void addEdge(int src, int dest, float w = 1){
         if (src >= nv || dest >= nv) return;
@@ -94,6 +104,14 @@ typedef struct TGraph {
             if (e.src == src && e.dest == dest)
                 return e.weight;
         return 0;
+    }
+    Edge getEdge(int src = 0, int dest = 0){
+        Edge emptyEdge;
+        emptyEdge.id = -1; 
+        for (Edge e: edgeList)
+            if (e.src == src && e.dest == dest)
+                return e;
+        return emptyEdge;
     }
     void printVertexList(){
         for (std::pair<int, Vertex> v: vertexList)
@@ -179,8 +197,10 @@ typedef struct TGraph {
             visited[vid] = true;
             float minCostToV = v.second;
 
-            if (vid == dest)
+            if (vid == dest) { //reached the destination 
                 minCost = minCostToV;
+                break;
+            }
             
             for (int uid: vertexList[vid].adjacents){
                 if (visited[uid] == false){
@@ -191,30 +211,81 @@ typedef struct TGraph {
         }
         std::cout << "The cost of the minimal path from " << src << " to " << dest << " is " << minCost << std::endl; 
     }
-    void MST_Prim(){
-        std::vector< pair<int,int> > mst;
-        
+    Edge getEdgeWithMinCost(){
+        int minCost = 1e7;
+        int src = -1, dest = -1;
+        for (int v = 0; v < nv; v++){
+            if (visited[v]){
+                for (int u: vertexList[v].adjacents){
+                    if (visited[u] == false){
+                        float c = getEdgeWeight(v,u);
+                        if (c < minCost){
+                            minCost = c;
+                            src = v;
+                            dest = u;
+                        }
+                    }
+                }
+            }
+        }
+        return getEdge(src,dest);
+    }
+    void MST_Prim(int v){
+        std::vector< Edge > mst;
+        float mstCost = 0; //total cost of all edges in mst  
+        init();
+
+        int n = vertexList.size();
+
+        bool allVerticesVisited = false; 
+        visited[v] = true;
+        while (mst.size() < (n - 1) && allVerticesVisited == false){ 
+            Edge e = getEdgeWithMinCost();
+            if (e.id == -1)
+                allVerticesVisited = true; 
+            else {
+                mst.push_back(e);
+                mstCost += e.weight;
+                visited[e.dest] = true;
+            }
+        }
+
+        std::cout << "Minimal spanning tree:" << std::endl; 
+        for (Edge e: mst)
+            e.print();
+
+        /*if (mst.size() != (n - 1))
+            std::cout << "Prim's algorithm failed" << std::endl; 
+        else {
+            std::cout << "Minimal spanning tree:\n" << std::endl; 
+            for (Edge e: mst)
+                e.print();
+        }*/
     }
 } Graph;
-  
+
 int main(){
-    int nv = 10;
+    int nv = 9;
     Graph *graph = new Graph("Graph 1", nv);
-    graph->setType(TGraph::directed);
+    graph->setType(TGraph::undirected);
     
     for (int i = 0; i < nv; i++)
         graph->addVertex(i, "V" + to_string(i)); 
     
-    graph->addEdge(0, 1);
-    graph->addEdge(0, 4);
-    graph->addEdge(1, 2);
-    graph->addEdge(1, 3);
-    graph->addEdge(1, 4);
-    graph->addEdge(2, 3);
-    graph->addEdge(3, 4);
-    graph->addEdge(3, 5);
-    graph->addEdge(3, 7);
-    graph->addEdge(7, 9);
+    int min = 1, max = 25;
+    graph->addEdge(0, 1, (int)rgen::randint(min,max));
+    graph->addEdge(0, 4, (int)rgen::randint(min,max));
+    graph->addEdge(1, 2, (int)rgen::randint(min,max));
+    graph->addEdge(1, 3, (int)rgen::randint(min,max));
+    graph->addEdge(1, 4, (int)rgen::randint(min,max));
+    graph->addEdge(2, 3, (int)rgen::randint(min,max));
+    graph->addEdge(3, 4, (int)rgen::randint(min,max));
+    graph->addEdge(3, 5, (int)rgen::randint(min,max));
+    graph->addEdge(3, 7, (int)rgen::randint(min,max));
+    graph->addEdge(7, 8, (int)rgen::randint(min,max));
+    graph->addEdge(4, 5, (int)rgen::randint(min,max));
+    graph->addEdge(5, 8, (int)rgen::randint(min,max));
+    graph->addEdge(6, 2, (int)rgen::randint(min,max));
 
     graph->printVertexList();
     graph->printEdgeList();
@@ -229,8 +300,12 @@ int main(){
     graph->BFS(1);
     graph->BFS(0);
 
-    graph->minimalPath(1, 9);
-    graph->minimalPath(3, 9);
+    graph->minimalPath(1, 8);
+    graph->minimalPath(3, 8);
+    graph->minimalPath(4, 8);
+
+    graph->MST_Prim(8);
     
+    delete graph;
     return 0;
 }
