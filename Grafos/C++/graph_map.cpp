@@ -1,3 +1,4 @@
+#include <cmath>
 #include <vector>
 #include <map>
 #include <string>
@@ -183,11 +184,15 @@ typedef struct TGraph {
             return (v1.second > v2.second);
         }
     };
-    void minimalPath(int src, int dest){
+    void minimalPath(int src){
         float minCost = -1;
         std::vector< int > minPath;
+        std::vector< float > distances(nv);
+        for (int i = 0; i < distances.size(); i++)
+            distances[i] = 1e7;
         std::priority_queue < pair<int,float>, std::vector< pair<int,float> >, CostComparator > queue;
         init();
+        distances[src] = 0;
         queue.push(make_pair(src,0));
         while(queue.empty() == false){
             pair<int,float> v = queue.top();
@@ -197,19 +202,26 @@ typedef struct TGraph {
             visited[vid] = true;
             float minCostToV = v.second;
 
-            if (vid == dest) { //reached the destination 
+            /*if (vid == dest) { //reached the destination 
                 minCost = minCostToV;
                 break;
-            }
+            }*/
             
             for (int uid: vertexList[vid].adjacents){
                 if (visited[uid] == false){
                     float minCostToU = minCostToV + getEdgeWeight(vid,uid);
-                    queue.push(make_pair(uid,minCostToU));
+                    if (minCostToU < distances[uid]){
+                        distances[uid] = minCostToU;
+                        queue.push(make_pair(uid,minCostToU));
+                    }
                 }
             }
         }
-        std::cout << "The cost of the minimal path from " << src << " to " << dest << " is " << minCost << std::endl; 
+        std::cout << "The cost of the minimal path from " << src << " is: "<< std::endl;
+        for (int i = 0; i < distances.size(); i++){
+            std::cout << "distance to " << i << " is " << distances[i] << std::endl;
+        }
+        std::cout << std::endl; 
     }
     Edge getEdgeWithMinCost(){
         int minCost = 1e7;
@@ -300,9 +312,9 @@ int main(){
     graph->BFS(1);
     graph->BFS(0);
 
-    graph->minimalPath(1, 8);
-    graph->minimalPath(3, 8);
-    graph->minimalPath(4, 8);
+    graph->minimalPath(1);
+    graph->minimalPath(3);
+    graph->minimalPath(4);
 
     graph->MST_Prim(8);
     

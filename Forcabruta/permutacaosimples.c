@@ -22,9 +22,10 @@ void permutacao(int n, int x[], int used[], int k){
 }
 
 int main(){
-    int i, n, x[100], used[100];
+    int i, n;
     printf("Entre com o valor de n: ");
     scanf("%d", &n);
+    int x[n], used[n];
     /* se um elemento i estiver em uso, entao used[i] = 1,
     caso contrario, used[i] = 0. */
     for (i = 0; i < n; i++)
